@@ -1,0 +1,105 @@
+Option Explicit
+
+Sub SortingHat()
+
+'__________
+'Define variables
+
+Dim WB As Workbook
+Dim WS_data As Worksheet
+
+Dim i As Integer 'looper
+Dim int_teams As Integer 'total number of teams
+
+Dim int_Teamcol As Integer 'column with team numbers
+Dim int_Gendercol As Integer 'column with genders ("Male", "Female")
+Dim int_Scorecol As Integer 'column with the final player score
+
+Dim int_Players As Integer 'number of players plus one (for the header)
+
+Dim int_TeamM As Integer 'current team number for males
+Dim int_Mdir As Integer 'direction of snake pattern (-1 descending, 0 repeating, 1 ascending)
+Dim boo_Mi As Boolean 'boolean to repeat ends of snake
+
+Dim int_TeamF As Integer 'current team number for females
+Dim int_Fdir As Integer 'direction of snake pattern (-1 descending, 0 repeating, 1 ascending)
+Dim boo_Fi As Boolean 'boolean to repeat ends of snake
+
+'__________
+'Set workbook and worksheet
+
+Set WB = ActiveWorkbook
+Set WS_data = WB.ActiveSheet
+
+'__________
+'User Input
+
+int_teams = InputBox(Prompt:="How many teams?")
+int_Gendercol = Application.InputBox(Prompt:="Select a cell in the Gender column and hit Okay", Type:=8).Column
+int_Scorecol = Application.InputBox(Prompt:="Select a cell in the Player Score column and hit Okay", Type:=8).Column
+
+'__________
+'Create the team column
+
+int_Teamcol = WS_data.UsedRange.Columns.Count + 1
+Cells(1, int_Teamcol).Value = "Team"
+
+'__________
+'Set values for snake pattern
+int_Players = WS_data.UsedRange.Rows.Count
+
+int_TeamM = 1
+int_Mdir = 1
+boo_Mi = False
+
+int_TeamF = int_teams
+int_Fdir = -1
+boo_Fi = False
+
+'__________
+'Sort players
+With WS_data
+    .UsedRange.Sort key1:=.Columns(int_Scorecol), order1:=xlDescending, Header:=xlYes
+End With
+
+'__________
+'Add players to teams
+For i = 2 To int_Players 'assumed header row
+    
+    If WS_data.Cells(i, int_Gendercol) = "Male" Then
+        Cells(i, int_Teamcol) = int_TeamM
+        
+        If (int_TeamM = int_teams Or int_TeamM = 1) And boo_Mi Then 'repeat teams at end of snake
+            int_Mdir = 0
+            boo_Mi = False
+        ElseIf int_TeamM = int_teams And Not boo_Mi Then 'descending
+            int_Mdir = -1
+        ElseIf int_TeamM = 1 And Not boo_Mi Then 'ascending
+            int_Mdir = 1
+        Else
+            boo_Mi = True
+        End If
+        int_TeamM = int_TeamM + int_Mdir 'incrememt
+        
+    ElseIf WS_data.Cells(i, int_Gendercol) = "Female" Then
+        Cells(i, int_Teamcol) = int_TeamF
+
+        If (int_TeamF = int_teams Or int_TeamF = 1) And boo_Fi Then 'repeat teams at end of snake
+            int_Fdir = 0
+            boo_Fi = False
+        ElseIf int_TeamF = int_teams And Not boo_Fi Then 'descending
+            int_Fdir = -1
+        ElseIf int_TeamF = 1 And Not boo_Fi Then 'ascending
+            int_Fdir = 1
+        Else
+            boo_Fi = True
+        End If
+        int_TeamF = int_TeamF + int_Fdir 'increment
+        
+    Else
+        Cells(i, int_Teamcol) = "No Gender"
+    End If
+    
+Next
+
+End Sub
