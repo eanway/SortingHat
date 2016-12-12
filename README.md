@@ -1,0 +1,2 @@
+# SortingHat
+Hat tournament sorting
